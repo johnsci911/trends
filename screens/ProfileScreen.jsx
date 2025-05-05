@@ -117,13 +117,13 @@ export default function ProfileScreen() {
   )
 
   return (
-      <FlatList
-        data={DATA}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListHeaderComponent={ProfileHeader}
-      />
+    <FlatList
+      data={DATA}
+      renderItem={renderItem}
+      keyExtractor={item => item.id}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+      ListHeaderComponent={ProfileHeader}
+    />
   )
 }
 
