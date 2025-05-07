@@ -31,6 +31,15 @@ export default function TweetScreen({ navigation }) {
         <Text style={styles.tweetContent}>
           Ipsum odit libero mollitia omnis ratione nihil Iste assumenda voluptate tempore veritatis pariatur Laborum mollitia sint quod officia excepturi, asperiores? Excepturi suscipit ipsam ducimus quam voluptatem et Odit ipsum sequi aliquam temporibus deserunt nisi consectetur. Saepe modi doloremque maxime architecto!
         </Text>
+        <View style={styles.tweetTimestampContainer}>
+          <Text style={styles.tweetTimestampText}>10:33 a.m</Text>
+          <Text style={styles.tweetTimestampText}>&middot;</Text>
+          <Text style={styles.tweetTimestampText}>18 Set.21</Text>
+          <Text style={styles.tweetTimestampText}>&middot;</Text>
+          <Text style={[styles.tweetTimestampText, styles.linkColor]}>
+            Twitter for iPhone
+          </Text>
+        </View>
       </View>
       <View style={styles.tweetEngagement}>
         <View style={styles.flexRow}>
@@ -128,6 +137,17 @@ const styles = StyleSheet.create({
   spaceAround: {
     justifyContent:'space-around',
     paddingHorizontal: 10,
+  },
+  tweetTimestampContainer: {
+    flexDirection: 'row',
+    marginTop: 12,
+  },
+  tweetTimestampText: {
+    color: 'gray',
+    marginRight: 6,
+  },
+  linkColor: {
+    color: '#1d9bf1',
   }
 })
 
