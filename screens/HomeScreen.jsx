@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
 
 import axios from 'axios';
@@ -9,6 +9,8 @@ import locale from 'date-fns/locale/en-US';
 import formatDistance from '../helpers/formatDistanceCustom';
 
 export default function HomeScreen({ navigation }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -21,10 +23,18 @@ export default function HomeScreen({ navigation }) {
       .then(response => {
         console.log(response.data);
         setData(response.data);
+        setIsLoading(false);
+        setIsRefreshing(false);
       })
       .catch(error => {
         console.error(error);
+        setIsRefreshing(false);
       });
+  }
+
+  function handleRefresh() {
+    setIsRefreshing(true);
+    getAllTweets();
   }
 
   function gotoProfile() {
@@ -94,12 +104,20 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        ItemSeparatorComponent={() => <View style={styles.tweetSeparator} />}
-      />
+      {isLoading ? (
+        <ActivityIndicator size="large" color="gray" style={{
+          marginTop: 8,
+        }} />
+      ) : (
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          ItemSeparatorComponent={() => <View style={styles.tweetSeparator} />}
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+        />
+      )}
       <TouchableOpacity
         style={styles.floatingButton}
         onPress={() => gotoNewTweet()}
