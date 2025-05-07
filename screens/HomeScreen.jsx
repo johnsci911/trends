@@ -12,17 +12,31 @@ export default function HomeScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isAtEndOfScrolling, setIsAtEndOfScrolling] = useState(false);
 
   useEffect(() => {
     getAllTweets();
-  }, [])
+  }, [page])
 
   function getAllTweets() {
     axios
-      .get('http://127.0.0.1:8000/api/tweets')
+      .get(`http://127.0.0.1:8000/api/tweets?page=${page}`)
       .then(response => {
         console.log(response.data);
-        setData(response.data);
+        if (page === 1) {
+          setData(response.data.data);
+        } else {
+          setData([
+            ...data,
+            ...response.data.data,
+          ]);
+        }
+
+        if (!response.data.next_page_url) {
+          setIsAtEndOfScrolling(true);
+        }
+
         setIsLoading(false);
         setIsRefreshing(false);
       })
@@ -33,8 +47,14 @@ export default function HomeScreen({ navigation }) {
   }
 
   function handleRefresh() {
+    setPage(1);
+    setIsAtEndOfScrolling(false);
     setIsRefreshing(true);
     getAllTweets();
+  }
+
+  function handleEnd() {
+    setPage(page + 1);
   }
 
   function gotoProfile() {
@@ -65,12 +85,12 @@ export default function HomeScreen({ navigation }) {
             {formatDistanceToNowStrict(
               new Date(
                 tweet.created_at),
-                {
-                  locale: {
-                    ...locale,
-                    formatDistance
-                  }
+              {
+                locale: {
+                  ...locale,
+                  formatDistance
                 }
+              }
             )}
           </Text>
         </TouchableOpacity>
@@ -116,6 +136,11 @@ export default function HomeScreen({ navigation }) {
           ItemSeparatorComponent={() => <View style={styles.tweetSeparator} />}
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
+          onEndReached={handleEnd}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={() => !isAtEndOfScrolling && (
+            <ActivityIndicator size="large" color="gray" style={{ marginBottom: 10 }} />
+          )}
         />
       )}
       <TouchableOpacity
