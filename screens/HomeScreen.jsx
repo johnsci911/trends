@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
-
-import axios from 'axios';
 import { formatDistanceToNowStrict } from 'date-fns';
 import locale from 'date-fns/locale/en-US';
-
 import formatDistance from '../helpers/formatDistanceCustom';
+import axiosConfig from '../helpers/axiosConfig';
 
 export default function HomeScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,10 +18,9 @@ export default function HomeScreen({ navigation }) {
   }, [page])
 
   function getAllTweets() {
-    axios
-      .get(`http://127.0.0.1:8000/api/tweets?page=${page}`)
+    axiosConfig
+      .get(`/tweets?page=${page}`)
       .then(response => {
-        console.log(response.data);
         if (page === 1) {
           setData(response.data.data);
         } else {
@@ -61,8 +58,10 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate('Profile Screen');
   }
 
-  function gotoSingleTweet() {
-    navigation.navigate('Tweet Screen');
+  function gotoSingleTweet(tweetId) {
+    navigation.navigate('Tweet Screen', {
+      tweetId: tweetId,
+    });
   }
 
   function gotoNewTweet() {
@@ -77,7 +76,7 @@ export default function HomeScreen({ navigation }) {
         }} />
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
-        <TouchableOpacity style={styles.flexRow} onPress={() => gotoSingleTweet()}>
+        <TouchableOpacity style={styles.flexRow} onPress={() => gotoSingleTweet(tweet.id)}>
           <Text numberOfLines={1} style={styles.tweetName}>{tweet.user.name}</Text>
           <Text numberOfLines={1} style={styles.tweetHandle}>@{tweet.user.username}</Text>
           <Text>&middot;</Text>
@@ -94,7 +93,10 @@ export default function HomeScreen({ navigation }) {
             )}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tweetContentContainer} onPress={() => gotoSingleTweet()}>
+        <TouchableOpacity
+          style={styles.tweetContentContainer}
+          onPress={() => gotoSingleTweet(tweet.id)}
+        >
           <Text style={styles.tweetContent}>{tweet.body}</Text>
         </TouchableOpacity>
         <View style={styles.tweetEngagement}>
