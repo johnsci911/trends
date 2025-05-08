@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { formatDistanceToNowStrict } from 'date-fns';
