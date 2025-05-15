@@ -3,14 +3,50 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, FlatList, ActivityIndicator } from 'react-native';
 import axiosConfig from '../helpers/axiosConfig';
 import { format } from 'date-fns';
+import RenderItem from '../components/RenderItem';
 
 export default function ProfileScreen({ route, navigation }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isAtEndOfScrolling, setIsAtEndOfScrolling] = useState(false);
+  const [isLoadingTweets, setIsLoadingTweets] = useState(true);
+  const [isRefreshingTweets, setIsRefreshingTweets] = useState(false);
 
   useEffect(() => {
+    getUserTweets();
     getUserProfile();
-  }, [])
+  }, [page])
+
+  function getUserTweets() {
+    axiosConfig
+      .get(`/users/${route.params.userId}/tweets?page=${page}`)
+      .then(response => {
+        console.log(response.data);
+
+        if (page === 1) {
+          setData(response.data.data);
+        } else {
+          setData([
+            ...data,
+            ...response.data.data,
+          ]);
+        }
+
+        if (!response.data.next_page_url) {
+          setIsAtEndOfScrolling(true);
+        }
+
+        setIsLoadingTweets(false);
+        setIsRefreshingTweets(false);
+      })
+      .catch(error => {
+        console.error(error);
+        setIsRefreshingTweets(false);
+      });
+  }
+
 
   function getUserProfile() {
     axiosConfig
@@ -24,52 +60,20 @@ export default function ProfileScreen({ route, navigation }) {
       })
   }
 
-  const DATA = [
-    {
-      id: 1,
-      title: 'Tweet 1',
-    },
-    {
-      id: 2,
-      title: 'Tweet 2',
-    },
-    {
-      id: 3,
-      title: 'Tweet 3',
-    },
-    {
-      id: 4,
-      title: 'Tweet 4',
-    },
-    {
-      id: 5,
-      title: 'Tweet 5',
-    },
-    {
-      id: 6,
-      title: 'Tweet 6',
-    },
-    {
-      id: 7,
-      title: 'Tweet 7',
-    },
-    {
-      id: 8,
-      title: 'Tweet 8',
-    },
-    {
-      id: 9,
-      title: 'Tweet 9',
-    },
-    {
-      id: 10,
-      title: 'Tweet 10',
-    },
-  ]
+  function handleRefresh() {
+    setPage(1);
+    setIsAtEndOfScrolling(false);
+    setIsRefreshingTweets(true);
+    getUserTweets();
+  }
+
+  function handleEnd() {
+    setPage(page + 1);
+  }
 
   const ProfileHeader = () => (
     <View style={styles.container}>
-      {isLoading ? (
+      {isLoadingTweets ? (
         <ActivityIndicator size="large" color="gray" />
       ) : (
         <>
@@ -134,23 +138,28 @@ export default function ProfileScreen({ route, navigation }) {
     </View>
   )
 
-  const renderItem = ({ item }) => (
-    <View style={{
-      marginVertical: 10,
-      marginHorizontal: 10,
-    }}>
-      <Text>{item.title}</Text>
-    </View>
-  )
-
   return (
-    <FlatList
-      data={DATA}
-      renderItem={renderItem}
-      keyExtractor={item => item.id}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-      ListHeaderComponent={ProfileHeader}
-    />
+    <View style={styles.container}>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="gray" style={{ marginTop: 8 }} />
+      ) : (
+        <FlatList
+          data={data}
+          renderItem={props => <RenderItem {...props} />}
+          keyExtractor={item => item.id}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListHeaderComponent={ProfileHeader}
+          refreshing={isRefreshingTweets}
+          onRefresh={handleRefresh}
+          onEndReached={handleEnd}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={() => !isAtEndOfScrolling && (
+            <ActivityIndicator size="large" color="gray" style={{ marginBottom: 10 }} />
+          )}
+          scrollIndicatorInsets={{ right: 1 }}
+        />
+      )}
+    </View>
   )
 }
 
