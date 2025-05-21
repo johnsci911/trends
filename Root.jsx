@@ -16,6 +16,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import LoginScreen from './screens/Auth/LoginScreen';
 import RegisterScreen from './screens/Auth/RegisterScreen';
+import * as SecureStore from 'expo-secure-store';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -127,9 +128,17 @@ export default function App() {
   useEffect(() => {
     // Check if user is authenticated
     // Check SecureStore for the user object/token
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000)
+    SecureStore.getItemAsync('user')
+     .then(userString => {
+        if (userString) {
+          setUser('JohnKarlo');
+        }
+        setIsLoading(false);
+      })
+     .catch(error => {
+        console.error(error);
+        setIsLoading(false);
+      });
   }, [])
 
   if (isLoading) {
