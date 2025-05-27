@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import axiosConfig from '../../helpers/axiosConfig';
 
@@ -58,11 +59,12 @@ export default function RegisterScreen({ navigation }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0} // adjust as needed
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0} // adjust as needed
       style={styles.container}
     >
       <ScrollView
-        contentContainerStyle={{ alignItems: 'center', flexGrow: 1, alignSelf: 'center' }}
+        // Get width of screen
+        contentContainerStyle={{ alignItems: 'center', flexGrow: 1, alignSelf: 'center', width: Dimensions.get('window').width }}
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ marginTop: 130, width: 260 }}>

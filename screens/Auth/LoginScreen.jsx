@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { ActivityIndicator, Button, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from "react-native";
+import { ActivityIndicator, Button, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, Dimensions } from "react-native";
 import { AuthContext } from '../../components/context/AuthProvider';
 
 export default function LoginScreen({ navigation }) {
@@ -10,11 +10,11 @@ export default function LoginScreen({ navigation }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0} // adjust as needed
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0} // adjust as needed
       style={styles.container}
     >
       <ScrollView
-        contentContainerStyle={{ alignItems: 'center', flexGrow: 1, alignSelf: 'center' }}
+        contentContainerStyle={{ alignItems: 'center', flexGrow: 1, alignSelf: 'center', width: Dimensions.get('window').width }}
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ marginTop: 130, width: 260 }}>
