@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { ActivityIndicator, Button, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Button, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from "react-native";
 import { AuthContext } from '../../components/context/AuthProvider';
 
 export default function LoginScreen({ navigation }) {
@@ -8,48 +8,61 @@ export default function LoginScreen({ navigation }) {
   const { login, error, isLoading } = useContext(AuthContext);
 
   return (
-    <View style={styles.container}>
-      <View style={{ marginTop: 130, width: 260 }}>
-        <View style={{ alignItems: 'center' }}>
-          <Image style={styles.logo} source={require('../../assets/larydefault.png')}></Image>
-        </View>
-        <View style={{ marginTop: 40 }}>
-          {error && <Text style={{ color: 'red' }}>{error}</Text>}
-          <TextInput
-            style={[styles.inputBox, styles.mt4]}
-            onChangeText={setEmail}
-            value={email}
-            placeholder="Email"
-            placeholderTextColor="gray"
-            textContentType='emailAddress'
-            keyboardType='email-address'
-            autoCapitalize='none'
-          />
-          <TextInput
-            style={[styles.inputBox, styles.mt4]}
-            onChangeText={setPassword}
-            value={password}
-            placeholder="Password"
-            placeholderTextColor="gray"
-            autoCapitalize='none'
-            secureTextEntry={true}
-          />
-        </View>
-        <TouchableOpacity onPress={() => login(email, password)} style={[styles.loginButton, styles.mt5]}>
-          {isLoading && (
-            <ActivityIndicator size="small" style={{ marginRight: 18 }} color="white" />
-          )}
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 12 }}>
-          <Text style={styles.registerText}>Do you have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register Screen')}>
-            <Text style={styles.registerTextLink}>Register</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0} // adjust as needed
+      style={styles.container}
+    >
+      <ScrollView
+        contentContainerStyle={{ alignItems: 'center', flexGrow: 1, alignSelf: 'center' }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={{ marginTop: 130, width: 260 }}>
+          <View style={{ alignItems: 'center' }}>
+            <Image style={styles.logo} source={require('../../assets/larydefault.png')}></Image>
+          </View>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <View style={{ marginTop: 40 }}>
+              {error && <Text style={{ color: 'red' }}>{error}</Text>}
+              <TextInput
+                style={[styles.inputBox, styles.mt4]}
+                onChangeText={setEmail}
+                value={email}
+                placeholder="Email"
+                placeholderTextColor="gray"
+                textContentType='emailAddress'
+                keyboardType='email-address'
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[styles.inputBox, styles.mt4]}
+                onChangeText={setPassword}
+                value={password}
+                placeholder="Password"
+                placeholderTextColor="gray"
+                autoCapitalize='none'
+                secureTextEntry={true}
+              />
+            </View>
+          </KeyboardAvoidingView>
+          <TouchableOpacity onPress={() => login(email, password)} style={[styles.loginButton, styles.mt5]}>
+            {isLoading && (
+              <ActivityIndicator size="small" style={{ marginRight: 18 }} color="white" />
+            )}
+            <Text style={styles.loginButtonText}>Login</Text>
           </TouchableOpacity>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 12 }}>
+            <Text style={styles.registerText}>Do you have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register Screen')}>
+              <Text style={styles.registerTextLink}>Register</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
