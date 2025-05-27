@@ -9,6 +9,7 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import axiosConfig from '../../helpers/axiosConfig';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -19,8 +20,34 @@ export default function RegisterScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  function register(email, username, password, confirmPassword) {
-    Alert.alert('Register Logic here');
+  function register(username, email, password, confirmPassword) {
+    if (name.length < 1) {
+      Alert.alert('Name is required')
+
+      return
+    }
+
+    setIsLoading(true);
+    axiosConfig
+      .post('/register', {
+        name,
+        email,
+        username,
+        password,
+        password_confirmation: confirmPassword,
+      })
+      .then((response) => {
+        setIsLoading(false);
+        setError(null);
+        Alert.alert('You are now registered!');
+        navigation.navigate('Login Screen');
+      })
+      .catch((error) => {
+        console.log(error.response)
+        const key = Object.keys(error.response.data.errors)[0];
+        setError(error.response.data.errors[key][0]);
+        setIsLoading(false);
+      });
   }
 
   return (
@@ -80,7 +107,7 @@ export default function RegisterScreen({ navigation }) {
         </View>
 
         <TouchableOpacity
-          onPress={() => register(email, username, password, confirmPassword)}
+          onPress={() => register(username, email, password, confirmPassword)}
           style={[styles.loginButton, styles.mt5]}
         >
           {isLoading && (

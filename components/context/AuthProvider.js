@@ -53,7 +53,8 @@ export const AuthProvider = ({ children }) => {
             })
             .catch(error => {
               console.log(JSON.stringify(error.response?.data?.message ?? error.message, null, 2));
-              setError(error.response?.data?.message ?? error.message);
+              const key = Object.keys(error.response.data.errors)[0];
+              setError(error.response.data.errors[key][0]);
             })
             .finally(() => {
               setUser(null);
