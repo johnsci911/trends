@@ -22,6 +22,54 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
+const HomeStackNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: true, headerBackTitleVisible: false }}
+    >
+      <Stack.Screen
+        name="Tab"
+        component={TabNavigator}
+        options={{ headerShown: false, title: '' }}
+      />
+      <Stack.Screen
+        name="New Tweet"
+        component={NewTweet}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="Tweet Screen"
+        component={TweetScreen}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="Profile Screen"
+        component={ProfileScreen}
+        options={{ title: '' }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const AuthStackNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false, headerBackTitleVisible: false }}
+    >
+      <Stack.Screen
+        name="Login Screen"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Register Screen"
+        component={RegisterScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+};
+
 const TabNavigator = () => {
   return (
     <Tab.Navigator
@@ -34,112 +82,53 @@ const TabNavigator = () => {
         name="Home1"
         component={HomeScreen}
         options={{
-          title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
-          )
+          ),
         }}
       />
       <Tab.Screen
         name="Search"
         component={SearchScreen}
         options={{
-          title: 'Search',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="search" size={size} color={color} />
-          )
+          ),
         }}
       />
       <Tab.Screen
         name="Notifications"
         component={NotificationsScreen}
         options={{
-          title: 'Notifications',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications" size={size} color={color} />
-          )
+          ),
         }}
       />
     </Tab.Navigator>
-  )
-}
-
-const HomeStackNavigator = () => {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-        headerBackTitleVisible: false,
-      }}
-    >
-      <Stack.Screen name="Tab" component={TabNavigator}
-        options={{
-          headerShown: false,
-          title: ''
-        }}
-      />
-      <Stack.Screen name="New Tweet" component={NewTweet}
-        options={{
-          title: ''
-        }}
-      />
-      <Stack.Screen name="Tweet Screen" component={TweetScreen}
-        options={{
-          title: ''
-        }}
-      />
-      <Stack.Screen name="Profile Screen" component={ProfileScreen}
-        options={{
-          title: ''
-        }}
-      />
-    </Stack.Navigator>
-  )
-}
-
-const AuthStackNavigator = () => {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        headerBackTitleVisible: false,
-      }}
-    >
-      <Stack.Screen name="Login Screen" component={LoginScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen name="Register Screen" component={RegisterScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack.Navigator>
-  )
-}
+  );
+};
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const {user, setUser} = useContext(AuthContext);
-
-  const valueOfUser = JSON.stringify(user);
+  const { user, setUser } = useContext(AuthContext);
 
   useEffect(() => {
-    // Check if user is authenticated
+    // check if user is logged in or not.
     // Check SecureStore for the user object/token
+
     SecureStore.getItemAsync('user')
-     .then(userString => {
+      .then(userString => {
         if (userString) {
           setUser(JSON.parse(userString));
         }
         setIsLoading(false);
       })
-     .catch(error => {
-        console.error(error);
+      .catch(err => {
+        console.log(err);
         setIsLoading(false);
       });
-  }, [])
+  }, []);
 
   if (isLoading) {
     return (
@@ -151,13 +140,11 @@ export default function App() {
 
   return (
     <>
-      { user ? (
+      {user ? (
         <NavigationContainer>
           <Drawer.Navigator
-            initialRouteName='Home'
-            screenOptions={{
-              headerShown: true,
-            }}
+            initialRouteName="Home"
+            screenOptions={{ headerShown: true }}
           >
             <Drawer.Screen name="Home" component={HomeStackNavigator} />
             <Drawer.Screen name="Settings" component={SettingsScreen} />
@@ -167,8 +154,7 @@ export default function App() {
         <NavigationContainer>
           <AuthStackNavigator />
         </NavigationContainer>
-      ) }
+      )}
     </>
   );
 }
-

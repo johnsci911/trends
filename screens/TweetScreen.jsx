@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ActivityIndicator } from 'react-native';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, ActivityIndicator, Alert } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import axiosConfig from '../helpers/axiosConfig';
+import { Modalize } from 'react-native-modalize';
+import { AntDesign } from '@expo/vector-icons';
+import { AuthContext } from '../components/context/AuthProvider';
 
 export default function TweetScreen({ route, navigation }) {
-  const [data, setData] = useState(null);
+  const [tweet, setTweet] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const modalizeRef = useRef(null);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     getTweet();
@@ -17,7 +22,7 @@ export default function TweetScreen({ route, navigation }) {
     axiosConfig
       .get(`/tweets/${route.params.tweetId}`)
       .then(response => {
-        setData(response.data);
+        setTweet(response.data);
         setIsLoading(false);
       })
       .catch(error => {
@@ -31,6 +36,41 @@ export default function TweetScreen({ route, navigation }) {
     })
   }
 
+  function showAlert() {
+    Alert.alert('Are you sure you want to delete this tweet?', null, [
+      {
+        text: 'Cancel',
+        onPress: () => modalizeRef.current.close(),
+        style: 'cancel'
+      },
+      {
+        text: 'OK',
+        onPress: () => deleteTweet(),
+        style: 'default'
+      }
+    ]);
+  }
+
+  function deleteTweet() {
+    axiosConfig.defaults.headers.common[
+      'Authorization'
+    ] = `Bearer ${user.token}`;
+
+    axiosConfig
+      .delete(`/tweets/${route.params.tweetId}`)
+      .then(() => {
+          Alert.alert('Tweet Deleted', 'Tweet has been deleted successfully.');
+          navigation.navigate('Tab', {
+            screen: 'Home1',
+            params: { tweetDeleted: true }
+          });
+      })
+      .catch(error => {
+        console.error(error.response);
+      })
+
+  }
+
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -40,31 +80,35 @@ export default function TweetScreen({ route, navigation }) {
           <View style={styles.profileContainer}>
             <TouchableOpacity
                 style={styles.flexRow}
-                onPress={() => gotoProfile(data.user.id)}
+                onPress={() => gotoProfile(tweet.user.id)}
               >
               <Image
                 style={styles.avatar}
                 source={{
-                  uri: data.user.avatar,
+                  uri: tweet.user.avatar,
                 }}
               />
               <View>
-                <Text style={styles.tweetName}>{data.user.name}</Text>
-                <Text style={styles.tweetHandle}>@{data.user.username}</Text>
+                <Text style={styles.tweetName}>{tweet.user.name}</Text>
+                <Text style={styles.tweetHandle}>@{tweet.user.username}</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.tweetButton}>
-              <Entypo name="dots-three-vertical" size={24} color="gray" />
-            </TouchableOpacity>
+            {user.id === tweet.user.id && (
+              <TouchableOpacity style={styles.tweetButton} onPress={() => {
+                  modalizeRef.current.open();
+                }}>
+                <Entypo name="dots-three-vertical" size={24} color="gray" />
+              </TouchableOpacity>
+            )}
           </View>
           <View style={styles.tweetContentContainer}>
             <Text style={styles.tweetContent}>
-              {data.body}
+              {tweet.body}
             </Text>
             <View style={styles.tweetTimestampContainer}>
-              <Text style={styles.tweetTimestampText}>{format(new Date(data.created_at), 'h:mm a')}</Text>
+              <Text style={styles.tweetTimestampText}>{format(new Date(tweet.created_at), 'h:mm a')}</Text>
               <Text style={styles.tweetTimestampText}>&middot;</Text>
-              <Text style={styles.tweetTimestampText}>{format (new Date(data.created_at), 'd MMM.yy')}</Text>
+              <Text style={styles.tweetTimestampText}>{format (new Date(tweet.created_at), 'd MMM.yy')}</Text>
               <Text style={styles.tweetTimestampText}>&middot;</Text>
               <Text style={[styles.tweetTimestampText, styles.linkColor]}>
                 Twitter for iPhone
@@ -103,6 +147,19 @@ export default function TweetScreen({ route, navigation }) {
               />
             </TouchableOpacity>
           </View>
+
+          <Modalize ref={modalizeRef} snapPoint={300}>
+            <View style={{ paddingHorizontal: 24, paddingVertical: 32 }}>
+              <TouchableOpacity style={styles.menuButton}>
+                <AntDesign name="pushpino" size={24} color="#222" />
+                <Text style={styles.menuButtonText}>Pin Tweet</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={showAlert} style={[styles.menuButton, styles.mt6]}>
+                <AntDesign name="delete" size={24} color="#222" />
+                <Text style={styles.menuButtonText}>Delete Tweet</Text>
+              </TouchableOpacity>
+            </View>
+          </Modalize>
         </>
       )}
     </View>
@@ -180,6 +237,18 @@ const styles = StyleSheet.create({
   },
   linkColor: {
     color: '#1d9bf1',
-  }
+  },
+  menuButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuButtonText: {
+    fontSize: 20,
+    color: '#222',
+    marginLeft: 12,
+  },
+  mt6: {
+    marginTop: 32,
+  },
 })
 
